@@ -10,6 +10,11 @@ class TokenizerTest < Test::Unit::TestCase
     assert_tokens([[:COMMENT, '/** Fooo */']], tokens)
   end
 
+  def test_comments_before_ident_staring_with_regexp_flag_character
+    tokens = @tokenizer.tokenize("/** Fooo */init")
+    assert_tokens([[:COMMENT, '/** Fooo */'],[:IDENT, 'init']], tokens)
+  end
+
   def test_string_single_quote
     tokens = @tokenizer.tokenize("foo = 'hello world';")
     assert_tokens([
@@ -91,6 +96,23 @@ class TokenizerTest < Test::Unit::TestCase
      ']' => ']',
      '}' => '}'}.each do |name, value|
       tokens = @tokenizer.tokenize("#{value}/2/3")
+      assert_tokens([
+                  [name, value],
+                   ["/", "/"],
+                   [:NUMBER, 2],
+                   ["/", "/"],
+                   [:NUMBER, 3],
+      ], tokens)
+    end
+  end
+
+  def test_regular_expression_is_not_found_if_prev_token_implies_division_with_whitespace
+    {:IDENT => 'foo',
+     :NUMBER => 1,
+     ')' => ')',
+     ']' => ']',
+     '}' => '}'}.each do |name, value|
+      tokens = @tokenizer.tokenize("#{value} / 2 / 3")
       assert_tokens([
                   [name, value],
                    ["/", "/"],

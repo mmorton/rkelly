@@ -82,7 +82,7 @@ module RKelly
         end
       end
 
-      token(:REGEXP, /\A\/(?:[^\/\r\n\\]*(?:\\[^\r\n][^\/\r\n\\]*)*)\/[gi]*/)
+      token(:REGEXP, /\A\/(?!\*)(?:[^\/\r\n\\]*(?:\\[^\r\n][^\/\r\n\\]*)*)\/[gimy]*/)
       token(:S, /\A[\s\r\n]*/m)
 
       token(:SINGLE_CHAR, /\A./) do |type, value|
@@ -111,7 +111,7 @@ module RKelly
           longest_token = match
         }
 
-        accepting_regexp = followable_by_regex(longest_token)
+        accepting_regexp = followable_by_regex(longest_token) if longest_token.name != :S
 
         longest_token.line = line_number
         line_number += longest_token.value.scan(/\n/).length
