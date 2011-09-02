@@ -45,8 +45,6 @@ module RKelly
       '/='  => :DIVEQUAL,
     }
 
-    TOKENS_THAT_IMPLY_DIVISION = [:IDENT, :NUMBER, ')', ']', '}']
-
     def initialize(&block)
       @lexemes = []
 
@@ -129,8 +127,11 @@ module RKelly
     def followable_by_regex(current_token)
      name = current_token.name
      name = current_token.value if name == :SINGLE_CHAR
-     #the tokens that imply division vs. start of regex form a disjoint set
-     !TOKENS_THAT_IMPLY_DIVISION.include?(name)
+     value = current_token.value
+
+     # the tokens that imply division vs. start of regex form a disjoint set
+     # not (a :NUMBER, ')', ']', '}' || (an :IDENT && not a KEYWORD))
+     !([:NUMBER, ')', ']', '}'].include?(name) || (:IDENT == name && !KEYWORDS.include?(value)))
     end
   end
 end
